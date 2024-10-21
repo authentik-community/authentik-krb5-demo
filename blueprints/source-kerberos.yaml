@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/goauthentik/authentik/refs/heads/kerberos-source-reworked/blueprints/schema.json
+---
+version: 1
+metadata:
+  name: Source - Kerberos
+entries:
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: "Default - Source enrollment flow"
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: "Default - Source authentication flow"
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: "System - Kerberos Source - Mappings"
+      required: true
+
+  - id: kerberos-source
+    model: authentik_sources_kerberos.kerberossource
+    identifiers:
+      slug: kerberos
+    attrs:
+      name: Kerberos
+      enrollment_flow:
+        !Find [authentik_flows.flow, [slug, "default-source-enrollment"]]
+      authentication_flow:
+        !Find [authentik_flows.flow, [slug, "default-source-authentication"]]
+      realm: AUTHENTIK.COMPANY
+      krb5_conf: |
+        [libdefaults]
+          dns_lookup_realm = false
+          ticket_lifetime = 24h
+          renew_lifetime = 7d
+          forwardable = true
+          rdns = true
+          default_realm = AUTHENTIK.COMPANY
+
+        [realms]
+          AUTHENTIK_COMPANY = {
+            kdc = kdc:8888
+            admin_server = kdc:8749
+          }
+      sync_users: true
+      sync_users_password: true
+      sync_principal: authentik/admin@AUTHENTIK.COMPANY
+      sync_keytab: FILE:/shared/admin.keytab
+      spnego_keytab: FILE:/shared/spnego.keytab
+      password_login_update_internal_password: true
+      user_property_mappings:
+        - !Find [
+            authentik_sources_kerberos.kerberossourcepropertymapping,
+            [
+              name,
+              "authentik default Kerberos User Mapping: Multipart principals as service accounts",
+            ],
+          ]
+        - !Find [
+            authentik_sources_kerberos.kerberossourcepropertymapping,
+            [
+              name,
+              "authentik default Kerberos User Mapping: Ignore other realms",
+            ],
+          ]
+        - !Find [
+            authentik_sources_kerberos.kerberossourcepropertymapping,
+            [
+              name,
+              "authentik default Kerberos User Mapping: Ignore system principals",
+            ],
+          ]
+        - !Find [
+            authentik_sources_kerberos.kerberossourcepropertymapping,
+            [
+              name,
+              "authentik default Kerberos User Mapping: Add realm as group",
+            ],
+          ]
