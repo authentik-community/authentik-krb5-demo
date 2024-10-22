@@ -46,6 +46,7 @@ services:
       AUTHENTIK_POSTGRESQL__PASSWORD: postgres_password
     volumes:
       - ./blueprints/source-kerberos.yaml:/blueprints/source-kerberos.yaml:ro
+      - ./volumes/shared:/shared:ro
     depends_on:
       - postgresql
       - redis
