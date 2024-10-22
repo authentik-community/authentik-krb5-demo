@@ -41,7 +41,7 @@ entries:
           default_realm = AUTHENTIK.COMPANY
 
         [realms]
-          AUTHENTIK_COMPANY = {
+          AUTHENTIK.COMPANY = {
             kdc = kdc:8888
             admin_server = kdc:8749
           }
